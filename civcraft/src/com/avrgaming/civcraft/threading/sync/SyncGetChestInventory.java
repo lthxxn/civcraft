@@ -60,7 +60,7 @@ public class SyncGetChestInventory implements Runnable {
             Chest chest = null;
             
             if (((CraftWorld) Bukkit.getWorld(request.worldName)).isChunkLoaded(request.block_x >> 4, request.block_z >> 4)) {
-                Block b = chunk.bukkitChunk.getBlock(request.block_x, request.block_y, request.block_z);
+                Block b = Bukkit.getWorld(request.worldName).getBlockAt(request.block_x, request.block_y, request.block_z);
                 
                 try {
                     chest = (Chest) b.getState();
