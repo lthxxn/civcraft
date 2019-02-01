@@ -49,50 +49,33 @@ public class SyncGetChestInventory implements Runnable {
 		lock = new ReentrantLock();
 	}
 	
-	@Override
-	public void run() {
-		if (lock.tryLock()) {
-			try {	
-				for (int i = 0; i < UPDATE_LIMIT; i++) {
-					GetChestRequest request = requestQueue.poll();
-					if (request == null) {
-						continue;
-					}
-					
-					Chest chest = null;
-    
-                                        int chunkX = request.block_x >> 4;
-                                        int chunkZ = request.block_z >> 4;
-                                        net.minecraft.server.v1_11_R1.Chunk chunk =
-                                            ((CraftWorld) Bukkit.getWorld(request.worldName))
-                                                .getHandle()
-                                                .getChunkIfLoaded(chunkX, chunkZ);
+    @Override
+    public void run() {
+        for (int i = 0; i < UPDATE_LIMIT; i++) {
+            GetChestRequest request = requestQueue.poll();
+            if (request == null) {
+                continue;
+            }
             
-                                        if (chunk != null) {
-                                            Block b =
-                                                chunk.bukkitChunk.getBlock(
-                                                    request.block_x, request.block_y, request.block_z);
-    
-                                            try {
-                                                chest = (Chest)b.getState();
-                                            } catch (ClassCastException e) {
-                                                ItemManager.setTypeId(b, CivData.CHEST);
-                                                ItemManager.setTypeId(b.getState(), CivData.CHEST);
-                                                b.getState().update();
-                                                chest = (Chest)b.getState();
-                                            }
-                                        }
-					
-					
-					/* Set the result and signal all threads we're complete. */					
-					request.result = chest.getBlockInventory();
-					request.finished = true;
-					request.condition.signalAll();
-					
-				}
-			} finally {
-				lock.unlock();
-			}
-		}
-	}
+            Chest chest = null;
+            
+            if (((CraftWorld) Bukkit.getWorld(request.worldName)).isChunkLoaded(request.block_x >> 4, request.block_z >> 4)) {
+                Block b = chunk.bukkitChunk.getBlock(request.block_x, request.block_y, request.block_z);
+                
+                try {
+                    chest = (Chest) b.getState();
+                } catch (ClassCastException e) {
+                    ItemManager.setTypeId(b, CivData.CHEST);
+                    ItemManager.setTypeId(b.getState(), CivData.CHEST);
+                    b.getState().update();
+                    chest = (Chest) b.getState();
+                }
+            }
+            
+            
+            request.result = chest.getBlockInventory();
+            request.finished = true;
+            request.condition.signalAll();
+        }
+    }
 }
