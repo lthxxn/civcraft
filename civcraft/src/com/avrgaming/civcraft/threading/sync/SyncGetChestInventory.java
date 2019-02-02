@@ -37,6 +37,7 @@ public class SyncGetChestInventory implements Runnable {
 	public static final int UPDATE_LIMIT = 250;
 	
 	public static ReentrantLock lock;
+        private Object synchronizer = new Object();
 	
 	public static ConcurrentLinkedQueue<GetChestRequest> requestQueue =
             new ConcurrentLinkedQueue<>();
@@ -75,7 +76,10 @@ public class SyncGetChestInventory implements Runnable {
             
             request.result = chest.getBlockInventory();
             request.finished = true;
-            request.condition.signalAll();
+
+            synchronized (synchronizer) {
+                request.condition.signalAll();
+	    } 
         }
     }
 }
