@@ -566,14 +566,12 @@ public class Civilization extends SQLObject {
 			throw new CivException(CivSettings.localize.localizedString("civ_found_notItem"));
 		}
 		
-		Civilization existCiv = CivGlobal.getCiv(name);
-		if (existCiv != null) {
-			throw new CivException(CivSettings.localize.localizedString("var_civ_found_civExists",name));
+		if (CivGlobal.getCiv(name) != null || CivGlobal.getConqueredCiv(name) != null) {
+			throw new CivException(CivSettings.localize.localizedString("var_civ_found_civExists", name));
 		}
 		
-		Town existTown = CivGlobal.getTown(capitolName);
-		if (existTown != null) {
-			throw new CivException(CivSettings.localize.localizedString("var_civ_found_townExists",capitolName));
+		if (CivGlobal.getTown(capitolName) != null) {
+			throw new CivException(CivSettings.localize.localizedString("var_civ_found_townExists", capitolName));
 		}
 		
 		if (resident.hasCamp()) {
@@ -2037,7 +2035,7 @@ public class Civilization extends SQLObject {
     
     public void withdrawTradeGood(final String id) throws CivException {
         if (!this.hasTradeGood(id)) {
-            throw new CivException(CivSettings.localize.localizedString("var_virtualTG_civHasNoGood", "ง6" + CivSettings.goods.get(id).name + "งc"));
+            throw new CivException(CivSettings.localize.localizedString("var_virtualTG_civHasNoGood", "ยง6" + CivSettings.goods.get(id).name + "ยงc"));
         }
         final String[] goods = this.tradeGoods.split(", ");
         final ArrayList<String> newGoods = new ArrayList<String>();
